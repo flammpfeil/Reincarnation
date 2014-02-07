@@ -9,4 +9,5 @@ public class InitProxy {
 
 	public void initializeEntitiesRenderer() {}
 
+	public void displayChatGui(String text){}
 }

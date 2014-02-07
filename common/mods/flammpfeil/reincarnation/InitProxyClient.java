@@ -1,5 +1,7 @@
 package mods.flammpfeil.reincarnation;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -12,5 +14,10 @@ public class InitProxyClient extends InitProxy{
 	public void initializeEntitiesRenderer() {
 
 	    RenderingRegistry.registerEntityRenderingHandler(EntitySpirit.class, new RenderSpirit());
+	}
+
+	@Override
+	public void displayChatGui(String text) {
+		Minecraft.getMinecraft().displayGuiScreen(new GuiChat(text));
 	}
 }
