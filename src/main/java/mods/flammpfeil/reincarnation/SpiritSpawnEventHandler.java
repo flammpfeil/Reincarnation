@@ -30,7 +30,7 @@ public class SpiritSpawnEventHandler {
 			PotionEffect effect = el.getActivePotionEffect(Potion.regeneration);
 
 			if(el.getHealth() <= 0 && el.worldObj.isRemote && !el.getEntityData().hasKey("dying")){
-				SideProxy.proxy.displayChatGui("");
+				SideProxy.proxy.displayChatGui("dying now");
 			}
 
 			if(el.deathTime >= 15 && !(effect != null && effect.getAmplifier() == 60)){
@@ -38,6 +38,7 @@ public class SpiritSpawnEventHandler {
 					el.setHealth(0);
 					el.getEntityData().setBoolean("dead", true);
 
+					el.deathTime =19;
 					if(!el.worldObj.isRemote){
 						DamageSource ds = damageMap.get(el.getEntityId());
 						damageMap.remove(el.getEntityId());
@@ -52,6 +53,13 @@ public class SpiritSpawnEventHandler {
 					el.setHealth(0.01f);
 					el.getFoodStats().setFoodLevel(6);
 					el.stopUsingItem();
+
+					if(el.isInWater()){
+						el.motionX = 0;
+						el.motionY = 0;
+						el.motionZ = 0;
+					}
+
 					if(!el.worldObj.isRemote){
 
 						el.addPotionEffect(new PotionEffect(Potion.jump.getId(),2,-60,true));

@@ -1,1 +1,2 @@
-gradlew.bat setupDevWorkspace
+call start gradlew.bat setupDevWorkspace
+pause
