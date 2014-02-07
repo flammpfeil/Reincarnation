@@ -1,33 +1,29 @@
 package mods.flammpfeil.reincarnation;
 
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EntityLivingData;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.Facing;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 
 public class ItemSpirit extends Item {
 
-	public ItemSpirit(int par1) {
-		super(par1);
+	public ItemSpirit() {
 		this.setMaxStackSize(16);
 	}
 
@@ -49,11 +45,11 @@ public class ItemSpirit extends Item {
 		return true;
 	}
 
-	Icon fragment;
-	Icon bottled;
+	IIcon fragment;
+	IIcon bottled;
 
 	@Override
-	public void registerIcons(IconRegister par1IconRegister) {
+	public void registerIcons(IIconRegister par1IconRegister) {
 
 		bottled = par1IconRegister.registerIcon("flammpfeil.reincarnation:bottled");
 		fragment = par1IconRegister.registerIcon("flammpfeil.reincarnation:fragment");
@@ -62,7 +58,7 @@ public class ItemSpirit extends Item {
 	}
 
 	@Override
-	public Icon getIconFromDamage(int par1) {
+	public IIcon getIconFromDamage(int par1) {
 		return par1 == 0 ? fragment : par1 == 1 ? bottled : this.itemIcon;
 	}
 
@@ -96,13 +92,13 @@ public class ItemSpirit extends Item {
         }
         else
         {
-            int i1 = par3World.getBlockId(par4, par5, par6);
+            Block i1 = par3World.getBlock(par4, par5, par6);
             par4 += Facing.offsetsXForSide[par7];
             par5 += Facing.offsetsYForSide[par7];
             par6 += Facing.offsetsZForSide[par7];
             double d0 = 0.0D;
 
-            if (par7 == 1 && Block.blocksList[i1] != null && Block.blocksList[i1].getRenderType() == 11)
+            if (par7 == 1 && !i1.isAir(par3World, par4, par5, par6) && i1.getRenderType() == 11)
             {
                 d0 = 0.5D;
             }
@@ -140,7 +136,7 @@ public class ItemSpirit extends Item {
             }
             else
             {
-                if (movingobjectposition.typeOfHit == EnumMovingObjectType.TILE)
+                if (movingobjectposition.typeOfHit == MovingObjectType.BLOCK)
                 {
                     int i = movingobjectposition.blockX;
                     int j = movingobjectposition.blockY;
@@ -156,7 +152,7 @@ public class ItemSpirit extends Item {
                         return par1ItemStack;
                     }
 
-                    if (par2World.getBlockMaterial(i, j, k) == Material.water)
+                    if (par2World.getBlock(i, j, k).getMaterial() == Material.water)
                     {
                         Entity entity = spawnCreature(par2World, par1ItemStack, (double)i, (double)j, (double)k);
 
@@ -175,10 +171,6 @@ public class ItemSpirit extends Item {
         }
     }
 
-    /**
-     * Spawns the creature specified by the egg's type in the location specified by the last three parameters.
-     * Parameters: world, entityID, x, y, z.
-     */
     public static Entity spawnCreature(World par0World, ItemStack par1, double par2, double par4, double par6)
     {
     	if(par1.hasTagCompound() && par1.getTagCompound().hasKey("entitydata"))
@@ -194,7 +186,7 @@ public class ItemSpirit extends Item {
                 entity.setLocationAndAngles(par2, par4, par6, MathHelper.wrapAngleTo180_float(par0World.rand.nextFloat() * 360.0F), 0.0F);
                 entityliving.rotationYawHead = entityliving.rotationYaw;
                 entityliving.renderYawOffset = entityliving.rotationYaw;
-                entityliving.onSpawnWithEgg((EntityLivingData)null);
+                entityliving.onSpawnWithEgg((IEntityLivingData)null);
                 entityliving.setHealth(entityliving.getMaxHealth());
                 entityliving.deathTime = 0;
                 par0World.spawnEntityInWorld(entity);

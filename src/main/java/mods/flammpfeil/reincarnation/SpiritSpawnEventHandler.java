@@ -1,6 +1,8 @@
 package mods.flammpfeil.reincarnation;
 
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
+import java.util.HashMap;
+import java.util.Map;
+
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.boss.IBossDisplayData;
@@ -9,15 +11,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.src.ModLoader;
-import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class SpiritSpawnEventHandler {
 
-	@ForgeSubscribe
+	public static Map<Integer,DamageSource> damageMap = new HashMap<Integer,DamageSource>();
+
+	@SubscribeEvent
 	public void onLivingUpdate(LivingUpdateEvent event){
 
 		if(event.entityLiving instanceof EntityPlayer){
@@ -25,18 +29,31 @@ public class SpiritSpawnEventHandler {
 
 			PotionEffect effect = el.getActivePotionEffect(Potion.regeneration);
 
+			if(el.getHealth() <= 0 && el.worldObj.isRemote && !el.getEntityData().hasKey("dying")){
+				SideProxy.proxy.displayChatGui("");
+			}
+
 			if(el.deathTime >= 15 && !(effect != null && effect.getAmplifier() == 60)){
-				if(el.isSneaking()){
+				if(el.isSneaking() && !el.getEntityData().hasKey("dead")){
 					el.setHealth(0);
 					el.getEntityData().setBoolean("dead", true);
-				}else if(!el.getEntityData().hasKey("dead")){
 
-					el.deathTime = 15;
 					if(!el.worldObj.isRemote){
-						el.getEntityData().setBoolean("dying",true);
+						DamageSource ds = damageMap.get(el.getEntityId());
+						damageMap.remove(el.getEntityId());
+						if(ds == null)
+							ds = DamageSource.generic;
+						el.onDeath(ds);
+					}
+				}else if(!el.getEntityData().hasKey("dead")){
+					el.getEntityData().setBoolean("dying",true);
+					el.deathTime = 15;
 
-						el.setHealth(0.01f);
-						el.getFoodStats().setFoodLevel(6);
+					el.setHealth(0.01f);
+					el.getFoodStats().setFoodLevel(6);
+					el.stopUsingItem();
+					if(!el.worldObj.isRemote){
+
 						el.addPotionEffect(new PotionEffect(Potion.jump.getId(),2,-60,true));
 						el.addPotionEffect(new PotionEffect(Potion.digSlowdown.getId(),2,60,true));
 						el.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(),2,60,true));
@@ -55,7 +72,7 @@ public class SpiritSpawnEventHandler {
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onLivingDeath(LivingDeathEvent event){
 		if(event.entityLiving instanceof EntityPlayer){
 			EntityPlayer el = (EntityPlayer)event.entityLiving;
@@ -63,11 +80,17 @@ public class SpiritSpawnEventHandler {
 			if(!el.worldObj.isRemote){
 				if(!el.getEntityData().hasKey("dying")){
 
+					if(damageMap.size() > 10){
+						damageMap.clear();
+					}
+					damageMap.put(el.getEntityId(), event.source);
+					event.setCanceled(true);
+
 					NBTTagCompound entityTag = new NBTTagCompound();
 
 		            EntityLiving entitySpirit = (EntityLiving)EntityList.createEntityByName(Reincarnation.ENTITY_SPIRIT_NAME, el.worldObj);
 
-		            entitySpirit.setCustomNameTag(String.format("Spirit of \"%s\"", el.getDisplayName()));
+		            entitySpirit.setCustomNameTag(String.format("SpiritFragment of \"%s\"", el.getDisplayName()));
 
 		            entitySpirit.getEntityData().setString("playerName", el.getCommandSenderName());
 
@@ -80,14 +103,14 @@ public class SpiritSpawnEventHandler {
 
 		            el.worldObj.spawnEntityInWorld(entitySpirit);
 
-				}else{
+				}else if(!el.getEntityData().hasKey("dead")){
 					event.setCanceled(true);
 				}
 			}
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onLivingDrops(LivingDropsEvent event){
 		if(!event.entityLiving.worldObj.isRemote &&  event.entityLiving instanceof EntityLiving && !(event.entityLiving instanceof EntitySpirit)){
 			EntityLiving el = (EntityLiving)event.entityLiving;
@@ -112,7 +135,7 @@ public class SpiritSpawnEventHandler {
 
 		            entitySpirit.setCustomNameTag(String.format("Spirit of \"%s\"", el.getCustomNameTag()));
 
-		            entitySpirit.getEntityData().setCompoundTag("entitydata", entityTag);
+		            entitySpirit.getEntityData().setTag("entitydata", entityTag);
 
 		            entitySpirit.setLocationAndAngles(
 		            		el.posX,

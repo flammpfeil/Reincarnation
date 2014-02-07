@@ -1,17 +1,13 @@
 package mods.flammpfeil.reincarnation;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public class EntitySpirit extends EntityLiving implements INpc{
@@ -21,6 +17,7 @@ public class EntitySpirit extends EntityLiving implements INpc{
         this.setSize(0.2F, 0.2F);
 	}
 
+    @Override
     protected boolean canDespawn()
     {
         return false;
@@ -39,6 +36,7 @@ public class EntitySpirit extends EntityLiving implements INpc{
         return false;
     }
 
+    @Override
     protected boolean shouldSetPosAfterLoading()
     {
         return false;
@@ -68,10 +66,12 @@ public class EntitySpirit extends EntityLiving implements INpc{
         return true;
     }
 
+    @Override
     public boolean handleWaterMovement()
     {
         return false;
     }
+    @Override
     public boolean handleLavaMovement()
     {
         return false;
@@ -122,7 +122,7 @@ public class EntitySpirit extends EntityLiving implements INpc{
     			age++;
 
     			//5min despawn playerDethPoint
-    			if(600 < age){
+    			if(6000 < age){
     				this.setDead();
     			}
     		}
@@ -146,19 +146,21 @@ public class EntitySpirit extends EntityLiving implements INpc{
         		);
     }
 
+    @Override
     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
     {
         super.readEntityFromNBT(par1NBTTagCompound);
 
         if(par1NBTTagCompound.hasKey("entitydata"))
-        	this.getEntityData().setCompoundTag("entitydata", par1NBTTagCompound.getCompoundTag("entitydata"));
+        	this.getEntityData().setTag("entitydata", par1NBTTagCompound.getCompoundTag("entitydata"));
     }
 
+    @Override
     public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)
     {
         super.writeEntityToNBT(par1NBTTagCompound);
         if(this.getEntityData().hasKey("entitydata"))
-        	par1NBTTagCompound.setCompoundTag("entitydata", this.getEntityData().getCompoundTag("entitydata"));
+        	par1NBTTagCompound.setTag("entitydata", this.getEntityData().getCompoundTag("entitydata"));
     }
 
     @Override
@@ -166,7 +168,7 @@ public class EntitySpirit extends EntityLiving implements INpc{
 
     	if(par1EntityPlayer.getHeldItem() != null){
 
-    		if(par1EntityPlayer.getHeldItem().itemID == Item.glassBottle.itemID){
+    		if(par1EntityPlayer.getHeldItem().getItem() == Items.glass_bottle){
 
 		    	if(this.getEntityData().hasKey("entitydata")){
 					ItemStack bottle = par1EntityPlayer.getHeldItem();
@@ -174,9 +176,9 @@ public class EntitySpirit extends EntityLiving implements INpc{
 		    		ItemStack bottled = new ItemStack(Reincarnation.itemSpirit,1,1);
 
 		    		if(this.hasCustomNameTag())
-		    			bottled.setItemName("Bottled" + this.getCustomNameTag());
+		    			bottled.setStackDisplayName("Bottled" + this.getCustomNameTag());
 
-		    		bottled.getTagCompound().setCompoundTag("entitydata", this.getEntityData().getCompoundTag("entitydata"));
+		    		bottled.getTagCompound().setTag("entitydata", this.getEntityData().getCompoundTag("entitydata"));
 
 		    		--bottle.stackSize;
 
@@ -185,7 +187,7 @@ public class EntitySpirit extends EntityLiving implements INpc{
 		    		}else if (!par1EntityPlayer.inventory.addItemStackToInventory(bottled))
 		            {
 		        		if(!this.worldObj.isRemote){
-		        			par1EntityPlayer.dropPlayerItem(bottled);
+		        			par1EntityPlayer.dropPlayerItemWithRandomChoice(bottled,false);
 		        		}
 		            }
 	    		}else{
