@@ -16,7 +16,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-@Mod(name="Reincarnation",modid=Reincarnation.modid,useMetadata=false,version="r2")
+@Mod(name="Reincarnation",modid=Reincarnation.modid,useMetadata=false,version="r3")
 public class Reincarnation{
 
 	public static final String modid = "flammpfeil.reincarnation";
