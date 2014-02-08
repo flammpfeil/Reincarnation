@@ -53,7 +53,7 @@ public class SpiritSpawnEventHandler {
 					el.deathTime = 15;
 
 					el.setHealth(0.01f);
-					el.getFoodStats().setFoodLevel(6);
+					el.getFoodStats().addStats(6 - el.getFoodStats().getFoodLevel(),0);
 					el.stopUsingItem();
 
 					if(el.isInWater()){
