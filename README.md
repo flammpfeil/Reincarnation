@@ -58,9 +58,10 @@ minecraft mods
             * clientを起動します。
             * サーバ接続設定を追加します
             
-            > Multiplayer > Add server > Server Address > "localhost:25565"
+            > Multiplayer > Add server > Server Address > localhost:25565
             
-                * サーバ名は任意で
+            * サーバ名は任意で
+                
 1. eclipse編
     1. デバッグまで
         1. リポジトリーCloneを作る
@@ -71,6 +72,7 @@ minecraft mods
             > 新規＞フォルダー＞拡張＞リンクされたフォルダー
             
             * 1で作成した作業フォルダを指定します。
+            
         3. ソースフォルダ指定
             * src/main/以下にある java と resourceを選択しソースフォルダとして登録
             * 右クリック＞ビルド･パス＞ソースフォルダーとして使用
