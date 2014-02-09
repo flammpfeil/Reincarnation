@@ -194,7 +194,7 @@ public class ItemSpirit extends Item {
                 entity.setLocationAndAngles(par2, par4, par6, MathHelper.wrapAngleTo180_float(par0World.rand.nextFloat() * 360.0F), 0.0F);
                 entityliving.rotationYawHead = entityliving.rotationYaw;
                 entityliving.renderYawOffset = entityliving.rotationYaw;
-                entityliving.onSpawnWithEgg((EntityLivingData)null);
+                //entityliving.onSpawnWithEgg((EntityLivingData)null);
                 entityliving.setHealth(entityliving.getMaxHealth());
                 entityliving.deathTime = 0;
                 par0World.spawnEntityInWorld(entity);
