@@ -2,6 +2,7 @@ package mods.flammpfeil.reincarnation;
 
 import java.util.List;
 
+import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -77,7 +78,8 @@ public class ItemSpirit extends Item {
 				par3EntityLivingBase.setHealth(par3EntityLivingBase.getMaxHealth()/2);
 				par3EntityLivingBase.deathTime = 0;
 				par3EntityLivingBase.getEntityData().removeTag("dying");
-				par3EntityLivingBase.addPotionEffect(new PotionEffect(Potion.regeneration.getId(),2,60,true));
+				GameRegistry.onPlayerRespawn((EntityPlayer)par3EntityLivingBase);
+				par3EntityLivingBase.addPotionEffect(new PotionEffect(Potion.regeneration.getId(),2,59,true));
 				par3EntityLivingBase.worldObj.updateEntityWithOptionalForce(par3EntityLivingBase, false);
 				par3EntityLivingBase.worldObj.updateEntity(par3EntityLivingBase);
 

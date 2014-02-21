@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
+import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.boss.IBossDisplayData;
@@ -75,8 +76,9 @@ public class SpiritSpawnEventHandler {
 						el.hurtResistantTime = el.maxHurtResistantTime;
 					}
 				}
-			}else if(el.getHealth() > el.getMaxHealth()/3){
+			}else if(el.getHealth() > el.getMaxHealth()/3 && el.getEntityData().hasKey("dying")){
 				el.deathTime = 0;
+				GameRegistry.onPlayerRespawn(el);
 				el.getEntityData().removeTag("dying");
 			}
 
