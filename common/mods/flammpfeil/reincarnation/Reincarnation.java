@@ -60,6 +60,9 @@ public class Reincarnation{
 	public static int fragmentCountCraft = 3;
 	public static int fragmentCountBossDrop = 5;
 
+	public static boolean isKeepInventory = false;
+	public static boolean enabledSound = true;
+
 	public static Configuration mainConfiguration;
 
 	@EventHandler
@@ -94,6 +97,16 @@ public class Reincarnation{
 				propFragmentCount = mainConfiguration.get(Configuration.CATEGORY_GENERAL, "fragmentCount_BossDrop", fragmentCountBossDrop);
 				fragmentCountBossDrop = propFragmentCount.getInt();
 			}
+			{
+				Property propKeepInventory;
+				propKeepInventory = mainConfiguration.get(Configuration.CATEGORY_GENERAL, "allWaysKeepPlayerInventoryMode", isKeepInventory);
+				isKeepInventory = propKeepInventory.getBoolean(isKeepInventory);
+			}
+			{
+				Property propKeepInventory;
+				propKeepInventory = mainConfiguration.get(Configuration.CATEGORY_GENERAL, "soundEnabled", enabledSound);
+				enabledSound = propKeepInventory.getBoolean(enabledSound);
+			}
 
 		}
 		finally
@@ -117,7 +130,8 @@ public class Reincarnation{
 				.setPotionEffect(Potion.regeneration.getId(), 2, 60, 1.0f)
 				.setUnlocalizedName("flammpfeil.reincarnation:spiritfragmentbottle")
 				.setTextureName("flammpfeil.reincarnation:bottled")
-				.setCreativeTab(CreativeTabs.tabFood);
+				.setCreativeTab(CreativeTabs.tabFood)
+				.setContainerItem(Item.glassBottle);
 
 
 		int localEntityId = 0;
@@ -144,6 +158,7 @@ public class Reincarnation{
 		GameRegistry.addRecipe(new RecipeBlessingSpirit());
 		GameRegistry.addShapelessRecipe(new ItemStack(itemSpirit, this.fragmentCountCraft,0), new ItemStack(itemSpirit,1,1));
 		GameRegistry.addShapelessRecipe(new ItemStack(itemSpiritFragmentBottle), new ItemStack(itemSpirit), new ItemStack(Item.glassBottle));
+		GameRegistry.addShapelessRecipe(new ItemStack(itemSpirit), new ItemStack(itemSpiritFragmentBottle));
 
 	}
 
@@ -151,6 +166,7 @@ public class Reincarnation{
 	//static public WorldLoadTickHandler tickHandler = new WorldLoadTickHandler();
 
 	static public SpiritSpawnEventHandler handler = new SpiritSpawnEventHandler();
+
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent evt)
