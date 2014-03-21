@@ -3,18 +3,38 @@ package mods.flammpfeil.reincarnation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.INpc;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
-public class EntitySpirit extends EntityLiving implements INpc{
+public class EntitySpirit extends EntityLiving implements INpc,IInventory{
+
+	public static final String PlayerInventoryStr = "playerInventory";
+    public static final String EntityDataStr = "entitydata";
+    public static final String PlayerExpStr = "playerExp";
 
 	public EntitySpirit(World par1World) {
 		super(par1World);
         this.setSize(0.2F, 0.2F);
+	}
+
+	int talkFlag = 0;
+	@Override
+	public int getTalkInterval() {
+		talkFlag++;
+		talkFlag %= 5;
+		return talkFlag == 0  ? -1000 : 100;
+	}
+
+	@Override
+	protected String getLivingSound() {
+		return Reincarnation.enabledSound ? "random.orb" : null;
 	}
 
     @Override
@@ -93,10 +113,31 @@ public class EntitySpirit extends EntityLiving implements INpc{
     	Entity tag = par1DamageSource.getSourceOfDamage();
     	if(tag != null && tag instanceof EntityPlayer && ((EntityPlayer)tag).getHeldItem() == null){
 
+    		if(this.getEntityData().hasKey(PlayerInventoryStr) && 0 < this.getEntityData().getTagList(PlayerInventoryStr,10).tagCount()){
+	    		NBTTagList list = this.getEntityData().getTagList(PlayerInventoryStr,10);
+	    		for(int i = 0;i < list.tagCount(); i++){
+	    			ItemStack item = ItemStack.loadItemStackFromNBT(list.getCompoundTagAt(i));
+
+		    		this.entityDropItem(item, 0.0f);
+	    		}
+	    	}
+
+    		if(this.getEntityData().hasKey(PlayerExpStr)){
+    			int exp = this.getEntityData().getInteger(PlayerExpStr);
+    			if(0 < exp){
+                    while (exp > 0)
+                    {
+                        int j = EntityXPOrb.getXPSplit(exp);
+                        exp -= j;
+                        this.worldObj.spawnEntityInWorld(new EntityXPOrb(this.worldObj, this.posX, this.posY, this.posZ, j));
+                    }
+    			}
+	    	}
+
     		this.setDead();
     		this.spawnExplosionParticle();
 
-    		if(this.getEntityData().hasKey("entitydata")){
+    		if(this.getEntityData().hasKey(EntityDataStr)){
 
 	    		if(!this.worldObj.isRemote){
 		    		ItemStack fragment = new ItemStack(Reincarnation.itemSpirit, Reincarnation.fragmentCountDirectDrop);
@@ -118,12 +159,16 @@ public class EntitySpirit extends EntityLiving implements INpc{
     @Override
     public void onLivingUpdate() {
     	if(!this.worldObj.isRemote){
-    		if(!this.getEntityData().hasKey("entitydata")){
+    		if(!(this.getEntityData().hasKey(EntityDataStr)
+    			||(this.getEntityData().hasKey(PlayerInventoryStr) && 0 < this.getEntityData().getTagList(PlayerInventoryStr,10).tagCount())
+    				)){
+
     			age++;
 
     			//5min despawn playerDethPoint
     			if(6000 < age){
     				this.setDead();
+    	    		this.spawnExplosionParticle();
     			}
     		}
     	}
@@ -151,16 +196,16 @@ public class EntitySpirit extends EntityLiving implements INpc{
     {
         super.readEntityFromNBT(par1NBTTagCompound);
 
-        if(par1NBTTagCompound.hasKey("entitydata"))
-        	this.getEntityData().setTag("entitydata", par1NBTTagCompound.getCompoundTag("entitydata"));
+        if(par1NBTTagCompound.hasKey(EntityDataStr))
+        	this.getEntityData().setTag(EntityDataStr, par1NBTTagCompound.getCompoundTag(EntityDataStr));
     }
 
     @Override
     public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)
     {
         super.writeEntityToNBT(par1NBTTagCompound);
-        if(this.getEntityData().hasKey("entitydata"))
-        	par1NBTTagCompound.setTag("entitydata", this.getEntityData().getCompoundTag("entitydata"));
+        if(this.getEntityData().hasKey(EntityDataStr))
+        	par1NBTTagCompound.setTag(EntityDataStr, this.getEntityData().getCompoundTag(EntityDataStr));
     }
 
     @Override
@@ -170,7 +215,7 @@ public class EntitySpirit extends EntityLiving implements INpc{
 
     		if(par1EntityPlayer.getHeldItem().getItem() == Items.glass_bottle){
 
-		    	if(this.getEntityData().hasKey("entitydata")){
+		    	if(this.getEntityData().hasKey(EntityDataStr)){
 					ItemStack bottle = par1EntityPlayer.getHeldItem();
 
 		    		ItemStack bottled = new ItemStack(Reincarnation.itemSpirit,1,1);
@@ -178,7 +223,7 @@ public class EntitySpirit extends EntityLiving implements INpc{
 		    		if(this.hasCustomNameTag())
 		    			bottled.setStackDisplayName("Bottled" + this.getCustomNameTag());
 
-		    		bottled.getTagCompound().setTag("entitydata", this.getEntityData().getCompoundTag("entitydata"));
+		    		bottled.getTagCompound().setTag(EntityDataStr, this.getEntityData().getCompoundTag(EntityDataStr));
 
 		    		--bottle.stackSize;
 
@@ -192,6 +237,15 @@ public class EntitySpirit extends EntityLiving implements INpc{
 		            }
 	    		}else{
 
+			    	if(this.getEntityData().hasKey(PlayerInventoryStr) && 0 < this.getEntityData().getTagList(PlayerInventoryStr,10).tagCount()){
+			    		NBTTagList list = this.getEntityData().getTagList(PlayerInventoryStr,10);
+			    		for(int i = 0;i < list.tagCount(); i++){
+			    			ItemStack item = ItemStack.loadItemStackFromNBT(list.getCompoundTagAt(i));
+
+				    		this.entityDropItem(item, 0.0f);
+			    		}
+			    	}
+
 		    		if(!this.worldObj.isRemote && this.rand.nextDouble() < 0.3){
 			    		ItemStack fragment = new ItemStack(Reincarnation.itemSpirit);
 			    		this.entityDropItem(fragment, 0.0f);
@@ -204,8 +258,119 @@ public class EntitySpirit extends EntityLiving implements INpc{
 	    		return true;
     		}
 
+    	}else if(this.getEntityData().hasKey(PlayerInventoryStr) && 0 < this.getEntityData().getTagList(PlayerInventoryStr,10).tagCount()){
+    		par1EntityPlayer.displayGUIChest(this);
+    		return true;
     	}
 
     	return super.interact(par1EntityPlayer);
     }
+
+	@Override
+	public int getSizeInventory() {
+		return 45;
+	}
+
+	@Override
+	public ItemStack getStackInSlot(int i) {
+		NBTTagList list = this.getEntityData().getTagList(PlayerInventoryStr,10);
+		if(i < list.tagCount())
+			return ItemStack.loadItemStackFromNBT(list.getCompoundTagAt(i));
+		else
+			return null;
+	}
+
+	@Override
+	public ItemStack decrStackSize(int i, int j) {
+		NBTTagList list = this.getEntityData().getTagList(PlayerInventoryStr,10);
+		if(i < list.tagCount()){
+
+			NBTTagCompound tag = list.getCompoundTagAt(i);
+			ItemStack item = ItemStack.loadItemStackFromNBT(tag);
+
+            if(item.stackSize <= j)
+            {
+                ItemStack itemstack = item;
+                list.removeTag(i);
+                markDirty();
+                return itemstack;
+            }
+            ItemStack itemstack1 = item.splitStack(j);
+            if(item.stackSize == 0)
+            {
+                list.removeTag(i);
+            }else{
+            	item.writeToNBT(tag);
+            }
+            markDirty();
+            return itemstack1;
+		}
+		return null;
+	}
+
+	@Override
+	public ItemStack getStackInSlotOnClosing(int i) {
+		ItemStack item = getStackInSlot(i);
+		if(item != null){
+			NBTTagList list = this.getEntityData().getTagList(PlayerInventoryStr,10);
+			list.removeTag(i);
+		}
+        markDirty();
+		return item;
+	}
+
+	@Override
+	public void setInventorySlotContents(int i, ItemStack itemstack) {
+		NBTTagList list = this.getEntityData().getTagList(PlayerInventoryStr,10);
+		if(itemstack !=null){
+			NBTTagCompound tag = new NBTTagCompound();
+
+			itemstack.writeToNBT(tag);
+
+			list.appendTag(tag);
+		}else{
+			if(i < list.tagCount())
+				list.removeTag(i);
+		}
+        markDirty();
+	}
+
+    @Override
+    public String getInventoryName() {
+        return this.getCustomNameTag();
+    }
+
+    @Override
+    public boolean hasCustomInventoryName() {
+        return true;
+    }
+
+	@Override
+	public int getInventoryStackLimit() {
+		return 64;
+	}
+
+	@Override
+	public boolean isUseableByPlayer(EntityPlayer entityplayer) {
+		NBTTagList list = this.getEntityData().getTagList(PlayerInventoryStr,10);
+		return 0 < list.tagCount();
+	}
+
+    @Override
+    public void markDirty() {
+
+    }
+
+    @Override
+	public void openInventory() {
+	}
+
+	@Override
+	public void closeInventory() {
+	}
+
+	@Override
+	public boolean isItemValidForSlot(int i, ItemStack itemstack) {
+		return false;
+	}
 }

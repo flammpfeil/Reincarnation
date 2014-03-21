@@ -44,7 +44,7 @@ public class RecipeBlessingSpirit extends ShapedRecipes
             }
             else
             {
-                return itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("entitydata");
+                return itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey(EntitySpirit.EntityDataStr);
             }
         }
     }

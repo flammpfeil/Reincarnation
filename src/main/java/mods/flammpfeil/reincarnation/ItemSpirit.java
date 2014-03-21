@@ -1,5 +1,6 @@
 package mods.flammpfeil.reincarnation;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -73,7 +74,8 @@ public class ItemSpirit extends Item {
 				par3EntityLivingBase.setHealth(par3EntityLivingBase.getMaxHealth()/2);
 				par3EntityLivingBase.deathTime = 0;
 				par3EntityLivingBase.getEntityData().removeTag("dying");
-				par3EntityLivingBase.addPotionEffect(new PotionEffect(Potion.regeneration.getId(),2,60,true));
+                FMLCommonHandler.instance().firePlayerRespawnEvent((EntityPlayer)par3EntityLivingBase);
+				par3EntityLivingBase.addPotionEffect(new PotionEffect(Potion.regeneration.getId(),2,59,true));
 				par3EntityLivingBase.worldObj.updateEntityWithOptionalForce(par3EntityLivingBase, false);
 				par3EntityLivingBase.worldObj.updateEntity(par3EntityLivingBase);
 
@@ -173,9 +175,9 @@ public class ItemSpirit extends Item {
 
     public static Entity spawnCreature(World par0World, ItemStack par1, double par2, double par4, double par6)
     {
-    	if(par1.hasTagCompound() && par1.getTagCompound().hasKey("entitydata"))
+    	if(par1.hasTagCompound() && par1.getTagCompound().hasKey(EntitySpirit.EntityDataStr))
     	{
-    		NBTTagCompound tag =par1.getTagCompound().getCompoundTag("entitydata");
+    		NBTTagCompound tag =par1.getTagCompound().getCompoundTag(EntitySpirit.EntityDataStr);
 
 
             Entity entity = EntityList.createEntityFromNBT(tag, par0World);

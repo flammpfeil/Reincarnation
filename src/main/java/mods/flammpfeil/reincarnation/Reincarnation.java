@@ -16,7 +16,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-@Mod(name="Reincarnation",modid=Reincarnation.modid,useMetadata=false,version="r3")
+@Mod(name="Reincarnation",modid=Reincarnation.modid,useMetadata=false,version="r5")
 public class Reincarnation{
 
 	public static final String modid = "flammpfeil.reincarnation";
@@ -29,6 +29,9 @@ public class Reincarnation{
 	public static int fragmentCountDirectDrop = 2;
 	public static int fragmentCountCraft = 3;
 	public static int fragmentCountBossDrop = 5;
+
+	public static boolean isKeepInventory = false;
+	public static boolean enabledSound = true;
 
 	public static Configuration mainConfiguration;
 
@@ -54,6 +57,16 @@ public class Reincarnation{
 				propFragmentCount = mainConfiguration.get(Configuration.CATEGORY_GENERAL, "fragmentCount_BossDrop", fragmentCountBossDrop);
 				fragmentCountBossDrop = propFragmentCount.getInt();
 			}
+			{
+				Property propKeepInventory;
+				propKeepInventory = mainConfiguration.get(Configuration.CATEGORY_GENERAL, "allWaysKeepPlayerInventoryMode", isKeepInventory);
+				isKeepInventory = propKeepInventory.getBoolean(isKeepInventory);
+			}
+			{
+				Property propKeepInventory;
+				propKeepInventory = mainConfiguration.get(Configuration.CATEGORY_GENERAL, "soundEnabled", enabledSound);
+				enabledSound = propKeepInventory.getBoolean(enabledSound);
+			}
 
 		}
 		finally
@@ -74,7 +87,8 @@ public class Reincarnation{
 				.setPotionEffect(Potion.regeneration.getId(), 2, 60, 1.0f)
 				.setUnlocalizedName("flammpfeil.reincarnation.spiritfragmentbottle")
 				.setTextureName("flammpfeil.reincarnation:bottled")
-				.setCreativeTab(CreativeTabs.tabFood);
+				.setCreativeTab(CreativeTabs.tabFood)
+				.setContainerItem(Items.glass_bottle);
 
 		GameRegistry.registerItem(itemSpiritFragmentBottle, "bottledSpritFragment");
 
@@ -84,6 +98,7 @@ public class Reincarnation{
 		GameRegistry.addRecipe(new RecipeBlessingSpirit());
 		GameRegistry.addShapelessRecipe(new ItemStack(itemSpirit, this.fragmentCountCraft,0), new ItemStack(itemSpirit,1,1));
 		GameRegistry.addShapelessRecipe(new ItemStack(itemSpiritFragmentBottle), new ItemStack(itemSpirit), new ItemStack(Items.glass_bottle));
+		GameRegistry.addShapelessRecipe(new ItemStack(itemSpirit), new ItemStack(itemSpiritFragmentBottle));
 
 	}
 

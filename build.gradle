@@ -17,12 +17,12 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "mc1.7.2-r4"
+version = "mc1.7.2-r5"
 group= "mods.flammpfeil.reincarnation" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "Reincarnation"
 
 minecraft {
-    version = "1.7.2-10.12.0.1024"
+    version = "1.7.2-10.12.0.1046"
     assetDir = "eclipse/assets"
 }
 processResources
