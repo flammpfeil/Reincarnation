@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.boss.IBossDisplayData;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,6 +20,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.event.entity.player.PlayerDropsEvent;
 
 public class SpiritSpawnEventHandler {
 
@@ -87,6 +90,69 @@ public class SpiritSpawnEventHandler {
 		}
 	}
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onPlayerDrops(PlayerDropsEvent event){
+        EntityLiving entitySpirit = (EntityLiving)EntityList.createEntityByName(Reincarnation.ENTITY_SPIRIT_NAME, event.entityPlayer.worldObj);
+
+        entitySpirit.setCustomNameTag(String.format("SpiritFragment of \"%s\"", event.entityPlayer.getDisplayName()));
+
+        entitySpirit.getEntityData().setString("playerName", event.entityPlayer.getCommandSenderName());
+
+        if(!event.entityLiving.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory") && (Reincarnation.isKeepInventory || event.entityPlayer.inventory.consumeInventoryItem(Reincarnation.itemSpiritFragmentBottle))){
+
+            NBTTagList tag = new NBTTagList();
+
+            EntityItem[] eItems = event.drops.toArray(new EntityItem[]{});
+
+            int index = 0;
+
+            for(EntityItem eItem : eItems){
+                NBTTagCompound itemTag = new NBTTagCompound();
+                itemTag.setInteger("Slot",index++);
+                eItem.getEntityItem().writeToNBT(itemTag);
+
+                tag.appendTag(itemTag);
+
+                event.drops.remove(eItem);
+            }
+
+            /*
+            event.entityPlayer.inventory.writeToNBT(tag);
+
+            for (int i = 0; i < el.inventory.mainInventory.length; ++i)
+            {
+                if (el.inventory.mainInventory[i] != null)
+                {
+                    el.inventory.mainInventory[i] = null;
+                }
+            }
+
+            for (int i = 0; i < el.inventory.armorInventory.length; ++i)
+            {
+                if (el.inventory.armorInventory[i] != null)
+                {
+                    el.inventory.armorInventory[i] = null;
+                }
+            }
+
+            */
+
+            entitySpirit.getEntityData().setTag(EntitySpirit.PlayerInventoryStr, tag);
+
+            entitySpirit.getEntityData().setInteger(EntitySpirit.PlayerExpStr, event.entityPlayer.experienceTotal - Math.min(100, event.entityPlayer.experienceLevel * 7));
+
+        }
+
+        double y = Math.min(Math.max(event.entityPlayer.posY + 0.5,2.0),256.0);
+        entitySpirit.setLocationAndAngles(
+                event.entityPlayer.posX,
+                y,
+                event.entityPlayer.posZ,
+                event.entityPlayer.worldObj.rand.nextFloat() * 360.0F, 0.0F);
+
+        event.entityPlayer.worldObj.spawnEntityInWorld(entitySpirit);
+    }
+
 	@SubscribeEvent
 	public void onLivingDeath(LivingDeathEvent event){
 		if(!event.isCanceled() && event.entityLiving instanceof EntityPlayer){
@@ -100,8 +166,9 @@ public class SpiritSpawnEventHandler {
 					}
 					damageMap.put(el.getEntityId(), event.source);
 					event.setCanceled(true);
-					
+
 				}else if(el.getEntityData().hasKey("dead")){
+                    /*
 		            EntityLiving entitySpirit = (EntityLiving)EntityList.createEntityByName(Reincarnation.ENTITY_SPIRIT_NAME, el.worldObj);
 
 		            entitySpirit.setCustomNameTag(String.format("SpiritFragment of \"%s\"", el.getDisplayName()));
@@ -143,7 +210,7 @@ public class SpiritSpawnEventHandler {
 		            		el.worldObj.rand.nextFloat() * 360.0F, 0.0F);
 
 		            el.worldObj.spawnEntityInWorld(entitySpirit);
-
+*/
 				}else{
 					event.setCanceled(true);
 				}

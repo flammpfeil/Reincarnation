@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "mc1.7.2-r5"
+version = "mc1.7.2-r6"
 group= "mods.flammpfeil.reincarnation" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "Reincarnation"
 
