@@ -35,7 +35,8 @@ public class SpiritSpawnEventHandler {
 			PotionEffect effect = el.getActivePotionEffect(Potion.regeneration);
 
 			if(el.getHealth() <= 0 && el.deathTime < 14 && el.worldObj.isRemote && !el.getEntityData().hasKey("dying") && !el.getEntityData().hasKey("dead")){
-				SideProxy.proxy.displayChatGui("dying now");
+                if(SideProxy.proxy.canShowGui(el.getUniqueID()))
+                    SideProxy.proxy.displayChatGui("dying now");
 			}
 
 			if(el.deathTime >= 15 && !(effect != null && effect.getAmplifier() == 60)){
